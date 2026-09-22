@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมที่ 3: โพสต์ได้ไหม? | IT Pro Mission</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #4c1d95 100%);
+            --card-bg: rgba(255, 255, 255, 0.96);
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --accent-cyan: #06b6d4;
+            --accent-pink: #ec4899;
+            --accent-yellow: #f59e0b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --font-head: 'Poppins', 'Sarabun', sans-serif;
+            --font-body: 'Sarabun', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before, body::after {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            filter: blur(90px);
+            z-index: 0;
+            opacity: 0.5;
+        }
+        body::before { background: var(--accent-cyan); top: -120px; left: -120px; }
+        body::after { background: var(--accent-pink); bottom: -120px; right: -120px; }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 255, 255, 0.3) inset;
+            width: 100%;
+            max-width: 720px;
+            padding: 35px;
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(20px);
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        .screen { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .screen.active { display: block; opacity: 1; }
+
+        .hero-icon { font-size: 4.5rem; text-align: center; margin-bottom: 10px; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+
+        h1 {
+            font-family: var(--font-head);
+            font-size: 2.3rem;
+            text-align: center;
+            background: linear-gradient(90deg, #7c3aed, #db2777);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            font-weight: 900;
+        }
+
+        .subtitle { text-align: center; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px; }
+
+        .rules-card {
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border: 2px dashed #c4b5fd;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .rules-card h3 {
+            font-family: var(--font-head);
+            color: #6d28d9;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .rules-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .rules-card li { font-size: 0.95rem; color: #4b5563; display: flex; align-items: center; gap: 8px; }
+        .rules-card li::before { content: '💡'; }
+
+        .btn {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 18px;
+            font-size: 1.15rem;
+            font-family: var(--font-head);
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.25s ease;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(236, 72, 153, 0.5); }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge {
+            font-family: var(--font-head);
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #475569;
+        }
+        .badge.score { color: #7c3aed; font-size: 1.1rem; }
+        .badge.timer-text { color: #db2777; font-size: 1.1rem; }
+
+        .timer-container {
+            width: 100%;
+            background: #e2e8f0;
+            height: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }
+        .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #06b6d4, #10b981);
+            border-radius: 6px;
+            transition: width 1s linear;
+        }
+
+        /* Mock Social Post Card */
+        .social-post-box {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+            position: relative;
+        }
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .post-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(168, 85, 247, 0.3);
+        }
+        .post-user-info .name { font-family: var(--font-head); font-weight: 700; font-size: 1rem; color: #1e293b; }
+        .post-user-info .time { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .post-content {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #0f172a;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 16px;
+            border-left: 5px solid #8b5cf6;
+        }
+
+        /* Decision Buttons (3 Big Buttons) */
+        .decision-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .decision-btn {
+            border: none;
+            padding: 16px 20px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-family: var(--font-head);
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: left;
+        }
+        .decision-btn:hover { transform: translateY(-3px); filter: brightness(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .decision-btn:active { transform: translateY(0); }
+
+        .btn-green { background: #d1fae5; color: #065f46; border: 2px solid #34d399; }
+        .btn-yellow { background: #fef3c7; color: #92400e; border: 2px solid #fbbf24; }
+        .btn-red { background: #ffe4e6; color: #9f1239; border: 2px solid #fb7185; }
+
+        .decision-btn .icon { font-size: 1.5rem; }
+
+        /* Result Screen */
+        .result-container { text-align: center; }
+        .trophy-icon { font-size: 4rem; margin-bottom: 2px; }
+        
+        .score-display-box {
+            background: linear-gradient(135deg, #f5f3ff 0%, #fbcfe8 100%);
+            border-radius: 20px;
+            padding: 18px;
+            margin: 12px 0;
+            border: 2px solid #f472b6;
+        }
+        .score-number { font-family: var(--font-head); font-size: 3rem; font-weight: 900; color: #db2777; line-height: 1; }
+        .score-total { font-size: 0.95rem; color: #6b7280; font-weight: 600; margin-top: 4px; }
+
+        .evaluation-badge {
+            font-family: var(--font-head);
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 50px;
+            display: inline-block;
+            margin-bottom: 15px;
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .mistake-section {
+            text-align: left;
+            background: #fff1f2;
+            border: 2px solid #fecdd3;
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .mistake-section h3 {
+            font-family: var(--font-head);
+            color: #e11d48;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mistake-item {
+            background: #ffffff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            border-left: 4px solid #ef4444;
+            font-size: 0.9rem;
+        }
+        .perfect-score-msg {
+            background: #ecfdf5;
+            border: 2px solid #a7f3d0;
+            color: #065f46;
+            padding: 14px;
+            border-radius: 14px;
+            font-family: var(--font-head);
+            font-weight: 700;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 1. หน้าแรก -->
+        <div id="start-screen" class="screen active">
+            <div class="hero-icon">💻📱✨</div>
+            <h1>เกมที่ 3 : โพสต์ได้ไหม?</h1>
+            <p class="subtitle">ทดสอบทักษะการตัดสินใจแชร์ข้อมูลดิจิทัลสำหรับ ม.6 (หน่วยที่ 2)</p>
+            
+            <div class="rules-card">
+                <h3>📌 กติกาภารกิจ:</h3>
+                <ul>
+                    <li>วิเคราะห์โพสต์จำลองทั้งหมด 10 สถานการณ์แบบต่อเนื่อง</li>
+                    <li>⏱️ จำกัดเวลาตัดสินใจข้อละ 15 วินาที</li>
+                    <li>🎯 ตอบถูก +10 คะแนน (ถ้าตอบภายใน 5 วิแรก รับโบนัส +5 คะแนน!)</li>
+                    <li>❌ ตอบผิดหัก -5 คะแนน | หมดเวลา 0 คะแนน (คะแนนเต็ม 150 คะแนน)</li>
+                    <li>💡 <b>ระบบจะเฉลยข้อที่ตอบผิดพร้อมเหตุผลสรุปทั้งหมดตอนท้ายเกมทีเดียว!</b></li>
+                </ul>
+            </div>
+            
+            <button class="btn" onclick="startGame()">
+                🚀 เริ่มลุยเกมเลย!
+            </button>
+        </div>
+
+        <!-- 2. หน้าเล่นเกม -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="badge" id="stage-indicator"><span>🎯</span> สถานการณ์ 1/10</div>
+                <div class="badge timer-text" id="timer-display">⏳ 15 วินาที</div>
+                <div class="badge score" id="score-display">⭐ คะแนน: 0</div>
+            </div>
+            
+            <div class="timer-container">
+                <div id="timer-fill" class="timer-fill"></div>
+            </div>
+            
+            <div class="social-post-box">
+                <div class="post-header">
+                    <div class="post-avatar">🌐</div>
+                    <div class="post-user-info">
+                        <div class="name">ฟีดข่าวโซเชียลจำลอง</div>
+                        <div class="time">โพสต์เมื่อเร็วๆ นี้ • สาธารณะ</div>
+                    </div>
+                </div>
+                <div id="post-content" class="post-content">กำลังโหลดโพสต์...</div>
+            </div>
+
+            <div class="decision-grid">
+                <button class="decision-btn btn-green" onclick="makeDecision('🟢 เผยแพร่ได้')">
+                    <span class="icon">🟢</span> เผยแพร่ได้ (แชร์เลย ปลอดภัย)
+                </button>
+                <button class="decision-btn btn-yellow" onclick="makeDecision('🟡 ตรวจสอบก่อนเผยแพร่')">
+                    <span class="icon">🟡</span> ตรวจสอบก่อนเผยแพร่ (เช็กความถูกต้องก่อน)
+                </button>
+                <button class="decision-btn btn-red" onclick="makeDecision('🔴 ไม่ควรเผยแพร่')">
+                    <span class="icon">🔴</span> ไม่ควรเผยแพร่ (เสี่ยง/ผิดจริยธรรม)
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. หน้าสรุปผล -->
+        <div id="result-screen" class="screen">
+            <div class="result-container">
+                <div class="trophy-icon" id="result-emoji">🏆</div>
+                <h2 style="font-family: var(--font-head); color: #1e293b; font-size: 1.6rem; margin-bottom: 2px;">ภารกิจประเมินโพสต์เสร็จสิ้น!</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px;">สรุปคะแนนรวมและเฉลยข้อที่ตอบผิด</p>
+
+                <div class="score-display-box">
+                    <div class="score-number" id="final-score">0</div>
+                    <div class="score-total">จากคะแนนเต็ม 150 คะแนน</div>
+                </div>
+
+                <div id="evaluation-text" class="evaluation-badge">ระดับความเชี่ยวชาญ</div>
+
+                <!-- พื้นที่แสดงข้อที่ตอบผิดพร้อมเฉลยและเหตุผล -->
+                <div id="mistakes-container"></div>
+
+                <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: 15px;">
+                    ⏱️ เวลาที่ใช้ทั้งหมด: <b id="total-time" style="color: var(--text-main);">0 นาที 0 วินาที</b>
+                </div>
+
+                <button class="btn" onclick="startGame()">
+                    🔄 เล่นใหม่อีกรอบ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenarios = [
+            {
+                id: 1,
+                post: "📱 'พรุ่งนี้โรงเรียนหยุด! ส่งต่อให้เพื่อนด่วน!!!' (มาจากแชตลูกโซ่ไม่ระบุที่มา)",
+                correct: "🟡 ตรวจสอบก่อนเผยแพร่",
+                reason: "ควรตรวจสอบข้อมูลกับประกาศทางการของโรงเรียนก่อนแชร์ต่อ ป้องกันข่าวลือเท็จ"
+            },
+            {
+                id: 2,
+                post: "📸 โพสต์รูปหน้าเพื่อนตอนเผลอหลับในห้องเรียนลงโซเชียลส่วนตัวโดยเพื่อนไม่ยินยอม",
+                correct: "🔴 ไม่ควรเผยแพร่",
+                reason: "ละเมิดสิทธิส่วนบุคคลและความเป็นส่วนตัวของผู้อื่น อาจผิด พ.ร.บ. คอมพิวเตอร์"
+            },
+            {
+                id: 3,
+                post: "🏫 พบประกาศ 'กำหนดการพิธีมอบตัวและปัจฉิมนิเทศ ม.6' จากเว็บไซต์ทางการของโรงเรียน",
+                correct: "🟢 เผยแพร่ได้",
+                reason: "เป็นข้อมูลจากแหล่งที่มาทางการ เชื่อถือได้ และเป็นประโยชน์ต่อเพื่อนร่วมชั้น"
+            },
+            {
+                id: 4,
+                post: "📊 พบโพสต์อินโฟกราฟิกสรุปสถิติจำนวนผู้ติดเชื้อ มีตัวเลขละเอียดแต่ไม่มีอ้างอิงแหล่งที่มา",
+                correct: "🟡 ตรวจสอบก่อนเผยแพร่",
+                reason: "ข้อมูลมีรายละเอียดแต่ขาดที่มาที่ไปที่น่าเชื่อถือ ควรตรวจสอบต้นตอก่อนนำไปแชร์ต่อ"
+            },
+            {
+                id: 5,
+                post: "🎁 โพสต์ลิงก์แจกรางวัลโทรศัพท์มือถือฟรี เพียงแค่กรอกรหัสผ่านบัญชีโซเชียลของคุณ",
+                correct: "🔴 ไม่ควรเผยแพร่",
+                reason: "เข้าข่ายภัยคุกคามประเภท Phishing หลอกเอาข้อมูลส่วนตัวและรหัสผ่าน ห้ามแชร์เด็ดขาด"
+            },
+            {
+                id: 6,
+                post: "📝 โพสต์สรุปเนื้อหาติววิชาคอมพิวเตอร์ ม.6 ที่ทำสรุปขึ้นเองและตรวจสอบความถูกต้องแล้ว",
+                correct: "🟢 เผยแพร่ได้",
+                reason: "เป็นเนื้อหาที่มีประโยชน์ สร้างสรรค์ และผ่านการตรวจสอบความถูกต้องเรียบร้อยแล้ว"
+            },
+            {
+                id: 7,
+                post: "⚠️ ข่าวเตือนภัยด่วน! 'แอปพลิเคชันตัวใหม่ดูดเงินในบัญชีทันทีที่ติดตั้ง' (ไม่มีสำนักข่าวอ้างอิง)",
+                correct: "🟡 ตรวจสอบก่อนเผยแพร่",
+                reason: "ควรตรวจสอบข้อเท็จจริงจากศูนย์ต่อต้านข่าวปลอมหรือข่าวสำนักพิมพ์หลักก่อนตื่นตูมและแชร์ต่อ"
+            },
+            {
+                id: 8,
+                post: "🗣️ โพสต์ข้อความพาดพิงและต่อว่าเพื่อนร่วมชั้นด้วยถ้อยคำหยาบคายและใส่ร้ายป้ายสี",
+                correct: "🔴 ไม่ควรเผยแพร่",
+                reason: "เข้าข่ายการกลั่นแกล้งบนโลกออนไลน์ (Cyberbullying) และอาจเข้าข่ายความผิดฐานหมิ่นประมาท"
+            },
+            {
+                id: 9,
+                post: "🏆 ภาพถ่ายประกาศนียบัตรรางวัลชนะเลิศโครงงาน IT ของกลุ่มตนเอง พร้อมระบุชื่อสมาชิกครบถ้วน",
+                correct: "🟢 เผยแพร่ได้",
+                reason: "เป็นผลงานของตนเองและสมาชิกในกลุ่ม เป็นการเผยแพร่เชิงสร้างสรรค์และมีความภาคภูมิใจ"
+            },
+            {
+                id: 10,
+                post: "🔗 ลิงก์ข่าวพาดหัวรุนแรงชวนตกใจ แต่เนื้อหาภายในเว็บไม่มีส่วนเกี่ยวข้องกับพาดหัวเลย (Clickbait)",
+                correct: "🟡 ตรวจสอบก่อนเผยแพร่",
+                reason: "เป็นข่าวพาดหัวล่อลวงเพื่อเรียกยอดวิว (Clickbait) ควรตรวจสอบเนื้อหาก่อนแชร์เพื่อไม่ให้ตกเป็นเหยื่อ"
+            }
+        ];
+
+        let currentIndex = 0;
+        let score = 0;
+        let mistakesLog = [];
+        let timer;
+        let timeLeft = 15;
+        let questionStartTime;
+        let totalGameStartTime;
+
+        function startGame() {
+            currentIndex = 0;
+            score = 0;
+            mistakesLog = [];
+            totalGameStartTime = new Date();
+            
+            document.getElementById('start-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timer);
+            if (currentIndex >= scenarios.length) {
+                endGame();
+                return;
+            }
+
+            timeLeft = 15;
+            questionStartTime = new Date();
+            updateTimerDisplay();
+
+            const sc = scenarios[currentIndex];
+            document.getElementById('stage-indicator').innerHTML = `<span>🎯</span> สถานการณ์ ${currentIndex + 1}/10`;
+            document.getElementById('score-display').innerHTML = `⭐ คะแนน: ${score}`;
+            document.getElementById('post-content').innerText = sc.post;
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeLeft--;
+                const percent = (timeLeft / 15) * 100;
+                document.getElementById('timer-fill').style.width = `${percent}%`;
+                document.getElementById('timer-display').innerText = `⏳ ${timeLeft} วินาที`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    handleTimeOut();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-display').innerText = `⏳ ${timeLeft} วินาที`;
+            document.getElementById('timer-fill').style.width = '100%';
+        }
+
+        function makeDecision(choice) {
+            clearInterval(timer);
+
+            const sc = scenarios[currentIndex];
+            const timeElapsed = (new Date() - questionStartTime) / 1000;
+            const isCorrect = (choice === sc.correct);
+
+            if (isCorrect) {
+                let points = 10;
+                if (timeElapsed <= 5) points += 5; // โบนัสเร็ว
+                score += points;
+            } else {
+                score = Math.max(0, score - 5); // หัก 5 คะแนน
+                mistakesLog.push({
+                    title: `สถานการณ์ที่ ${sc.id}`,
+                    postText: sc.post,
+                    userAns: choice,
+                    correctAns: sc.correct,
+                    reason: sc.reason
+                });
+            }
+
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function handleTimeOut() {
+            const sc = scenarios[currentIndex];
+            
+            // หมดเวลาไม่หักเพิ่ม แต่บันทึกเป็นข้อผิดพลาด
+            mistakesLog.push({
+                title: `สถานการณ์ที่ ${sc.id}`,
+                postText: sc.post,
+                userAns: "หมดเวลา (ไม่ได้ตอบ)",
+                correctAns: sc.correct,
+                reason: sc.reason
+            });
+
+            currentIndex++;
+            loadQuestion();
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('result-screen').classList.add('active');
+
+            const totalTimeSec = Math.floor((new Date() - totalGameStartTime) / 1000);
+            const mins = Math.floor(totalTimeSec / 60);
+            const secs = totalTimeSec % 60;
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('total-time').innerText = `${mins} นาที ${secs} วินาที`;
+
+            // จัดการกล่องสรุปข้อผิดพลาดและเฉลย
+            const mistakesContainer = document.getElementById('mistakes-container');
+            mistakesContainer.innerHTML = '';
+
+            if (mistakesLog.length > 0) {
+                let html = `
+                    <div class="mistake-section">
+                        <h3>❌ รายการที่ตอบผิด / ต้องทบทวน (${mistakesLog.length} สถานการณ์)</h3>
+                `;
+                mistakesLog.forEach(m => {
+                    html += `
+                        <div class="mistake-item">
+                            <div><b>📌 ${m.title}:</b> <span style="color:var(--text-muted); font-size:0.85rem;">${m.postText}</span></div>
+                            <div style="color: #e11d48; margin: 3px 0;">❌ คุณตอบ: ${m.userAns}</div>
+                            <div style="color: #059669;">✅ ที่ถูกต้อง: ${m.correctAns}</div>
+                            <div style="color: #475569; font-size: 0.85rem; margin-top: 4px;">💡 <b>เหตุผล:</b> ${m.reason}</div>
+                        </div>
+                    `;
+                });
+                html += `</div>`;
+                mistakesContainer.innerHTML = html;
+            } else {
+                mistakesContainer.innerHTML = `
+                    <div class="perfect-score-msg">
+                        🌟 สมบูรณ์แบบที่สุด! คุณตัดสินใจถูกต้องทุกสถานการณ์ ไม่มีข้อผิดพลาดเลย สมเป็นเซียนไอที ม.6! 🏆
+                    </div>
+                `;
+            }
+
+            let evaluation = "";
+            let emoji = "🎉";
+            if (score >= 120) { evaluation = "🛡️ ผู้พิทักษ์ความปลอดภัยไซเบอร์ระดับมาสเตอร์"; emoji = "👑"; }
+            else if (score >= 90) { evaluation = "💎 นักวิเคราะห์ข้อมูลดิจิทัลมืออาชีพ"; emoji = "🚀"; }
+            else if (score >= 60) { evaluation = "📈 นักวิเคราะห์ข้อมูลระดับปานกลาง"; emoji = "💡"; }
+            else { evaluation = "📚 ควรทบทวนเนื้อหาการรู้เท่าทันสื่ออีกครั้ง"; emoji = "🔄"; }
+
+            document.getElementById('evaluation-text').innerText = evaluation;
+            document.getElementById('result-emoji').innerText = emoji;
+        }
+    </script>
+</body>
+</html>
